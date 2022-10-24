@@ -1,0 +1,79 @@
+from enum import auto
+from turtle import end_fill
+from chardet import detect
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import find_peaks
+from numpy import linspace
+from scipy.fft import fft, fftfreq
+from sigproc import framesig
+import math
+from faps import energia, ZCR, hurst
+from scipy.io import wavfile
+import statsmodels.api as sm
+import librosa
+
+NomeArquivo = 'vjdvn1.wav' #Definindo o arquivo a ser lido
+
+fs,sinal = wavfile.read(NomeArquivo)
+
+tamanho_sinal = len(sinal)
+
+sinal = sinal/max(abs(sinal))                               #Normalizando o sinal
+
+Ts=1/fs                                                       # Período de amostragem
+
+t=(np.arange(len(sinal)))/fs
+
+assert min(sinal) >= -1 and max(sinal) <= 1
+
+print('Fs: ',fs,'Hz')
+print('len(sinal): ', len(sinal), 'amostras')
+
+#Plotagem do sinal original
+
+plt.figure(1), plt.title('Sinal Original'), plt.grid()
+plt.plot(sinal), plt.xlabel('Frames'), plt.ylabel('Amplitude Normalizada'),plt.grid 
+plt.autoscale(tight='both')
+plt.savefig('glr_arara2.jpg')
+
+#Cálculos Estatísticos
+
+sampsPerMilli = int(fs / 1000)                  #Amostras por milissegundo
+millisPerFrame = 20
+sampsPerFrame = sampsPerMilli * millisPerFrame
+nFrames = int(len(sinal) / sampsPerFrame)        # Numero de frames
+ 
+print ('samples/millisecond  ==> ', sampsPerMilli)
+print ('samples/[%dms]frame  ==> ' % millisPerFrame, sampsPerFrame)
+print ('number of frames     ==> ', nFrames)
+
+#Cálculo da autocorrelação
+
+autoCorr = sm.tsa.acf(sinal, nlags = 5000)
+
+#Estimação do F0
+
+picos = find_peaks(autoCorr)[0]
+lag = picos[0]
+
+pitch = fs/lag
+
+print(picos)
+
+print(lag)
+
+print(pitch)
+
+
+#Cálculo do Espectro
+
+Yf = fft(sinal)
+Xf = fftfreq(len(sinal), Ts)[:len(sinal)//2]
+
+plt.figure(2)
+
+plt.plot(Xf, 2.0/len(sinal) * np.abs(Yf[0:len(sinal)//2]))
+plt.show(), plt.grid()
+
+
