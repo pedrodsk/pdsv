@@ -1,6 +1,4 @@
 **/bases_vozes
 **/__pycache__
-*.pyc
 *.pb
 *.h5
-*__pycache__
