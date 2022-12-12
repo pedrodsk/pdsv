@@ -1,4 +1,5 @@
 **/bases_vozes
 **/__pycache__
+**/.ipynb_checkpoints
 *.pb
 *.h5
